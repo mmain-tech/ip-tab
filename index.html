@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
+<meta charset="UTF-8" />
 <title>Loading IP…</title>
 <script>
 async function updateIP() {
@@ -10,8 +10,8 @@ async function updateIP() {
     const ipRes = await fetch("https://api.ipify.org?format=json");
     const { ip } = await ipRes.json();
 
-    // Get org/provider and location
-    const infoRes = await fetch(`https://ipapi.co/${ip}/json/`);
+    // Get org/provider and location (CORS-friendly API)
+    const infoRes = await fetch(`https://ipwhois.app/json/${ip}?lang=en`);
     const info = await infoRes.json();
 
     // Update tab title (Arc pinned tab shows this reliably)
@@ -19,22 +19,23 @@ async function updateIP() {
 
     // Update page content
     document.getElementById("ip").textContent = ip;
-    document.getElementById("org").textContent = info.org || "Unknown";
+    document.getElementById("org").textContent = "Provider: " + (info.org || "Unknown");
     document.getElementById("loc").textContent =
-      `${info.city || ""} ${info.region || ""} ${info.country || ""}`;
-    
+      "Location: " + [info.city, info.region, info.country].filter(Boolean).join(", ");
+
   } catch (e) {
     document.title = "IP unavailable";
     document.getElementById("ip").textContent = "IP unavailable";
-    document.getElementById("org").textContent = "-";
-    document.getElementById("loc").textContent = "-";
+    document.getElementById("org").textContent = "Provider: -";
+    document.getElementById("loc").textContent = "Location: -";
+    console.error("Failed to fetch IP info:", e);
   }
 }
 
 // Initial load
 updateIP();
 
-// Refresh every 30s
+// Refresh every 30 seconds
 setInterval(updateIP, 30000);
 </script>
 
