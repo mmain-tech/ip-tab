@@ -1,57 +1,41 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<title>IP…</title>
-
+<meta charset="UTF-8">
+<title>Loading IP…</title>
 <script>
-let lastIP = null;
-
 async function updateIP() {
   try {
+    // Get public IP
     const ipRes = await fetch("https://api.ipify.org?format=json");
     const { ip } = await ipRes.json();
 
+    // Get org/provider and location
     const infoRes = await fetch(`https://ipapi.co/${ip}/json/`);
     const info = await infoRes.json();
 
-    const org = (info.org || "").toLowerCase();
-    const asn = (info.asn || "").toLowerCase();
+    // Update tab title (Arc pinned tab shows this reliably)
+    document.title = ip;
 
-    const vpnIndicators = [
-      "vpn", "hosting", "cloud", "digitalocean", "amazon",
-      "aws", "ovh", "linode", "mullvad", "nord", "proton",
-      "private internet access", "pia"
-    ];
-
-    const isVPN = vpnIndicators.some(v =>
-      org.includes(v) || asn.includes(v)
-    );
-
-    const vpnStatus = isVPN ? "VPN" : "LOCAL";
-
-    // Arc pinned tab prefers SHORT titles
-    document.title = `${vpnStatus} • ${ip}`;
-
+    // Update page content
     document.getElementById("ip").textContent = ip;
-    document.getElementById("vpn").textContent = vpnStatus;
     document.getElementById("org").textContent = info.org || "Unknown";
     document.getElementById("loc").textContent =
       `${info.city || ""} ${info.region || ""} ${info.country || ""}`;
-
-    // Detect IP change
-    if (lastIP && lastIP !== ip) {
-      document.body.classList.add("changed");
-    }
-    lastIP = ip;
-
+    
   } catch (e) {
     document.title = "IP unavailable";
+    document.getElementById("ip").textContent = "IP unavailable";
+    document.getElementById("org").textContent = "-";
+    document.getElementById("loc").textContent = "-";
   }
 }
 
+// Initial load
 updateIP();
-setInterval(updateIP, 20000); // 20s refresh
+
+// Refresh every 30s
+setInterval(updateIP, 30000);
 </script>
 
 <style>
@@ -79,42 +63,21 @@ body {
 }
 
 h1 {
-  font-size: 1.8rem;
+  font-size: 2rem;
   margin-bottom: 8px;
 }
 
-.status {
-  font-size: 1.1rem;
-  margin-bottom: 12px;
-}
-
 .meta {
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   opacity: 0.85;
-}
-
-.changed {
-  animation: flash 0.5s ease-in-out 3;
-}
-
-@keyframes flash {
-  0% { background: #000; }
-  50% { background: #082f49; }
-  100% { background: #000; }
 }
 </style>
 </head>
-
 <body>
   <div class="card">
     <h1 id="ip">Loading…</h1>
-    <div class="status">
-      Status: <strong id="vpn">—</strong>
-    </div>
-    <div class="meta">
-      <div id="org"></div>
-      <div id="loc"></div>
-    </div>
+    <div class="meta" id="org">Provider: -</div>
+    <div class="meta" id="loc">Location: -</div>
   </div>
 </body>
 </html>
