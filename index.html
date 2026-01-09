@@ -14,10 +14,10 @@ async function updateIP() {
     const infoRes = await fetch(`https://ipwhois.app/json/${ip}?lang=en`);
     const info = await infoRes.json();
 
-    // Determine tab color
-    let tabPrefix = "🔵"; // default blue
+    // Determine tab prefix
+    let tabPrefix = "[o]"; // default
     if (ip === "23.121.154.100" && info.city === "Hercules" && info.region === "CA") {
-      tabPrefix = "🔴"; // special case = red
+      tabPrefix = "[x]"; // special case
     }
 
     // Update tab title
