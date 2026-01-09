@@ -10,12 +10,18 @@ async function updateIP() {
     const ipRes = await fetch("https://api.ipify.org?format=json");
     const { ip } = await ipRes.json();
 
-    // Get org/provider and location (CORS-friendly API)
+    // Get org/provider and location
     const infoRes = await fetch(`https://ipwhois.app/json/${ip}?lang=en`);
     const info = await infoRes.json();
 
-    // Update tab title (Arc pinned tab shows this reliably)
-    document.title = ip;
+    // Determine tab color
+    let tabPrefix = "🔵"; // default blue
+    if (ip === "23.121.154.100" && info.city === "Hercules" && info.region === "CA") {
+      tabPrefix = "🔴"; // special case = red
+    }
+
+    // Update tab title
+    document.title = `${tabPrefix} ${ip}`;
 
     // Update page content
     document.getElementById("ip").textContent = ip;
